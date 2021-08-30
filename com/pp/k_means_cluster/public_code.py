@@ -204,6 +204,8 @@ def step1(n, c1_list, data, all_data_avg):
 
 def get_cluster(c1_list, data, all_data_avg):
     new_c_value, surplus, lamb_data = step2(c1_list, data, all_data_avg)
+    if not any(new_c_value) or not any(lamb_data):
+        return new_c_value, surplus,lamb_data
     # 如果 返回的 new_c_value，lamb_data 为[]  如何处理？？？？？？？？？？
     if (c1_list == new_c_value).all():
         cc_value = new_c_value
@@ -224,18 +226,21 @@ def get_cluster(c1_list, data, all_data_avg):
 ==================================================='''
 
 
-def step4_to_step6(ci_surplus, centroids):
+def step4_to_step6(ci_surplus, centroids, map_data):
     cf_surplus_data = np.array(ci_surplus)
     cf_n = shape(cf_surplus_data)[1]
     cf_avg = np.average(cf_surplus_data, axis=0)
     cf_list = create_array(cf_n)
     cf_list = step1(cf_n, cf_list, cf_surplus_data, cf_avg)
     cf_value, cf_surplus, cf_lambda_obj = get_cluster(cf_list, cf_surplus_data, cf_avg)
+    if not any(cf_value) or not any(cf_lambda_obj):
+        return  step4_to_step6(cf_surplus, centroids, map_data)
+    map_data[one_dimensional_array_to_str(cf_value)] = make_array(cf_lambda_obj)
     centroids.append(cf_value)
     if not any(np.array(cf_surplus).tolist()):
-        return centroids
+        return centroids, map_data
     else:
-        return step4_to_step6(cf_surplus, centroids)
+        return step4_to_step6(cf_surplus, centroids, map_data)
 
 
 def create_array(n):
@@ -254,3 +259,8 @@ def one_dimensional_array_to_str(ary):
     将一维数组转换为 字符串
     """
     return ','.join(str(i) for i in ary)
+
+
+def make_array(ary):
+    return np.array(ary)
+
