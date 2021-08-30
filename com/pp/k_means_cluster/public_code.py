@@ -87,16 +87,19 @@ def step2(c_list, data_list, avg):
     # 从 lambda_data_object_list 中获取离平均值最近的数据
     min_lambda_update_data_list = list()
     map_lambda_data = {}
+    one_data_obj = []
     for val in lambda_data_object_list:  # lambda_data_object_list 是距 c1 距离不大于 lambda 的所有数据对象
         lambda_distance = distEclud(val, lambda_data_avg)
         if lambda_distance == 0.0:
-            print("==============================")
+            print("=======lambda_distance == 0.0====")
+            one_data_obj = val
             continue
         if any(lambda_distance):
             min_lambda_update_data_list.append(lambda_distance)
             map_lambda_data[lambda_distance] = val
     if not any(min_lambda_update_data_list):
-        print("+++++++++++++++++")
+        print("======min_lambda_update_data_list为空==========")
+        return one_data_obj, surplus, lambda_data_object_list
     min_lambda_data_c1 = min(min_lambda_update_data_list)
     least_num_arr = map_lambda_data.get(min_lambda_data_c1)
     return least_num_arr, surplus, lambda_data_object_list
@@ -201,13 +204,14 @@ def step1(n, c1_list, data, all_data_avg):
 
 def get_cluster(c1_list, data, all_data_avg):
     new_c_value, surplus, lamb_data = step2(c1_list, data, all_data_avg)
+    # 如果 返回的 new_c_value，lamb_data 为[]  如何处理？？？？？？？？？？
     if (c1_list == new_c_value).all():
         cc_value = new_c_value
-        print("获取到聚类中心")
+        print("获取到聚类中心：", cc_value)
     else:
         new_c_value2, surplus2, lambda_data = get_cluster_central_point(new_c_value, data, all_data_avg)
         cc_value = new_c_value2
-        print("找到聚类中心")
+        print("找到聚类中心:", cc_value)
         surplus = surplus2
         lam = lambda_data
 

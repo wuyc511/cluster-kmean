@@ -6,8 +6,8 @@ from com.pp.k_means_cluster.public_code import step1, get_cluster, step4_to_step
 
 
 class get_class_cluster:
-    # file_path = '../data/iris.csv'
-    file_path = '../data/wine.csv'
+    file_path = '../data/iris.csv'
+    # file_path = '../data/wine.csv'
     # data = pd.read_csv(file_path)
     data = np.genfromtxt(file_path, delimiter=',', skip_header=1)  # skip_header=0,表示读取的csv数据，不读取第一行作为标题
     map_data_obj = {}
