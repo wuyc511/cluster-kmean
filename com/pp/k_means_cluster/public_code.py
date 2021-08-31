@@ -1,4 +1,3 @@
-
 import pandas as pd
 import numpy as np
 from numpy import *
@@ -70,7 +69,6 @@ def step2(c_list, data_list, avg):
     data_value = distEclud(c_list, avg) / 2
     lambda_data_object_list = list()
     surplus = list()
-    lambda_datas = list()
     # 距 c1 距离不大于 lambda 的所有数据对象
     for vas in data_list:
 
@@ -79,37 +77,25 @@ def step2(c_list, data_list, avg):
             lambda_data_object_list.append(vas)
         else:
             surplus.append(vas)
-
+    if len(lambda_data_object_list) == 1:
+        return lambda_data_object_list, surplus, lambda_data_object_list
     """步骤3："""
     # 计算lambda数据对象中的平均值
     lambda_data_avg = np.average(lambda_data_object_list, axis=0)
-
     # 从 lambda_data_object_list 中获取离平均值最近的数据
     min_lambda_update_data_list = list()
     map_lambda_data = {}
-    one_data_obj = []
     for val in lambda_data_object_list:  # lambda_data_object_list 是距 c1 距离不大于 lambda 的所有数据对象
         lambda_distance = distEclud(val, lambda_data_avg)
-        if lambda_distance == 0.0:
-            print("=======lambda_distance == 0.0====")
-            one_data_obj = val
-            continue
         if any(lambda_distance):
             min_lambda_update_data_list.append(lambda_distance)
             map_lambda_data[lambda_distance] = val
     if not any(min_lambda_update_data_list):
         print("======min_lambda_update_data_list为空==========")
-        return one_data_obj, surplus, lambda_data_object_list
+        return lambda_data_object_list, surplus, lambda_data_object_list
     min_lambda_data_c1 = min(min_lambda_update_data_list)
     least_num_arr = map_lambda_data.get(min_lambda_data_c1)
     return least_num_arr, surplus, lambda_data_object_list
-
-    # 比较 new_c1 和 c_value 的值，通过相等则往下执行，否则 重复从第二步开始
-    # if (c_value == new_c1):
-    #     return new_c1, surplus
-    # else:
-    #     # new_c1 和 c_value 不相等，则递归
-    #     return step2(new_c1, data_list, avg)
 
 
 def max_distance(data, data_avg):
@@ -202,10 +188,36 @@ def step1(n, c1_list, data, all_data_avg):
     return c1_list
 
 
+def array_is_equalse(new_c_value, lamb_data):
+    return len(new_c_value) == len(lamb_data) and (
+            distEclud(np.array(new_c_value), np.array(lamb_data)) == 0.0) \
+           and not all_is_null(new_c_value, lamb_data)
+
+
+def all_is_null(new_c_value, lamb_data):
+    """
+    判断两个数组是否为0的数组
+    :param new_c_value: 1
+    :param lamb_data: 2
+    :return: 如果两个数组为空则返回 True，否则返回 False
+    """
+    new_c = len(new_c_value)
+    lamb = len(lamb_data)
+    boolean = not any(new_c_value) and not any(lamb_data) and new_c == lamb == 0
+    return boolean
+
+
 def get_cluster(c1_list, data, all_data_avg):
     new_c_value, surplus, lamb_data = step2(c1_list, data, all_data_avg)
-    if not any(new_c_value) or not any(lamb_data):
-        return new_c_value, surplus,lamb_data
+
+    """
+     all_is_null(new_c_value, lamb_data)当没有一个数据 小于lambda的数据对象的时候
+     array_is_equalse(new_c_value, lamb_data) 小于lambda的数据对象只有一个的时候
+    """
+    # if all_is_null(new_c_value, lamb_data):
+    #     return
+    if array_is_equalse(new_c_value, lamb_data) or all_is_null(new_c_value, lamb_data):
+        return new_c_value, surplus, lamb_data
     # 如果 返回的 new_c_value，lamb_data 为[]  如何处理？？？？？？？？？？
     if (c1_list == new_c_value).all():
         cc_value = new_c_value
@@ -226,21 +238,40 @@ def get_cluster(c1_list, data, all_data_avg):
 ==================================================='''
 
 
-def step4_to_step6(ci_surplus, centroids, map_data):
+def step4_to_step6(ci_surplus, centroids, alone_point, _map):
     cf_surplus_data = np.array(ci_surplus)
     cf_n = shape(cf_surplus_data)[1]
     cf_avg = np.average(cf_surplus_data, axis=0)
     cf_list = create_array(cf_n)
     cf_list = step1(cf_n, cf_list, cf_surplus_data, cf_avg)
     cf_value, cf_surplus, cf_lambda_obj = get_cluster(cf_list, cf_surplus_data, cf_avg)
-    if not any(cf_value) or not any(cf_lambda_obj):
-        return  step4_to_step6(cf_surplus, centroids, map_data)
-    map_data[one_dimensional_array_to_str(cf_value)] = make_array(cf_lambda_obj)
-    centroids.append(cf_value)
-    if not any(np.array(cf_surplus).tolist()):
-        return centroids, map_data
+    # if array_is_equalse(cf_value, cf_lambda_obj) and not all_is_null(cf_value, cf_lambda_obj):
+    #     alone_point.append(cf_value)
+    #     return step4_to_step6(cf_surplus, centroids, alone_point, _map)
+
+    #
+    #
+    if not all_is_null(cf_value, cf_lambda_obj):
+        """
+        cf_value, cf_lambda_obj 都不是空数组
+        
+        """
+        _map[one_dimensional_array_to_str(cf_value)] = make_array(cf_lambda_obj)
+        centroids.append(cf_value)
+    elif array_is_equalse(cf_value, cf_lambda_obj):
+        """
+            小于等于lambda的数据对象只有1个时，将此数据对象归位孤立点的数据
+        """
+        alone_point.append(cf_value)
+        return step4_to_step6(cf_surplus, centroids, alone_point, _map)
+
+    if not any(np.array(cf_surplus).tolist()) or all_is_null(cf_value, cf_lambda_obj):
+        """
+        小于等于lambda的数据对象只有0个，则返回
+        """
+        return centroids, alone_point, _map, cf_surplus
     else:
-        return step4_to_step6(cf_surplus, centroids, map_data)
+        return step4_to_step6(cf_surplus, centroids, alone_point, _map)
 
 
 def create_array(n):
@@ -263,4 +294,3 @@ def one_dimensional_array_to_str(ary):
 
 def make_array(ary):
     return np.array(ary)
-

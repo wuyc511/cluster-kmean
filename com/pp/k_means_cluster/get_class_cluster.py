@@ -16,8 +16,8 @@ class get_class_cluster:
     # datasets = LoadDataSet(file_path)
     all_data_avg = np.average(data, axis=0)
     # 求总体均值，按列求均值，输出每一列的均值
-    """保存聚类中心的数据映射的小于lambda的数据对象 map"""
-    map_data = {}
+    # 保存聚类中心的数据映射的小于lambda的数据对象 map
+    _map = {}
 
     # 剩余对象平数据
 
@@ -34,8 +34,7 @@ class get_class_cluster:
     ==================================================='''
     # new_c_value 与 c1已经不变了的聚类中心
     new_c_value, surplus, lamb_data = get_cluster(c1_list, data, all_data_avg)
-    """ 将确定的聚类中心 和小于lambda的数据对象 映射存储在map中"""
-    map_data[one_dimensional_array_to_str(new_c_value)] = make_array(new_c_value)
+    _map[one_dimensional_array_to_str(new_c_value)] = make_array(lamb_data)
     centroids.append(new_c_value)
 
     # 离初始聚类中心最远的临时聚类中心
@@ -52,13 +51,15 @@ class get_class_cluster:
     |           step5 和 step6 new_ci 作为聚类中心          |
     ==================================================='''
     ci_value, ci_surplus, ci_lambda_obj = get_cluster(ci_list, surplus, sur_avg)
-    map_data[one_dimensional_array_to_str(ci_value)] = make_array(ci_lambda_obj)
+    _map[one_dimensional_array_to_str(ci_value)] = make_array(ci_lambda_obj)
     centroids.append(ci_value)
-    print("")
 
     '''-------------------------------------------------/
     |           step7 重复步骤 step4-step6               |
     |                直到找到 k 个聚类中心                 |
     ==================================================='''
-    cendd = step4_to_step6(ci_surplus, centroids,map_data)
-    print(cendd)
+    # 孤立点的数据
+    alone_point = list()
+    # _centroids:聚类中心, _alone:数据孤立点, _cf_surplus:剩余数据, , _cf_surplus:大于epusilong的数据对象，即剩余数据对象
+    _centroids, _alone, _map_data, _cf_surplus = step4_to_step6(ci_surplus, centroids, alone_point, _map)
+
