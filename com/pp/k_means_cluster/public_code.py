@@ -232,29 +232,25 @@ def get_cluster(c1_list, data, all_data_avg):
     return cc_value, surplus, lam
 
 
-'''-------------------------------------------------/
-|           step7 重复步骤 step4-step6               |
-|                直到找到 k 个聚类中心                 |
-==================================================='''
-
-
 def step4_to_step6(ci_surplus, centroids, alone_point, _map):
+    """
+        step7 重复步骤 step4-step6 ,直到找到 k 个聚类中心为止
+    :param ci_surplus: 剩余数据对象
+    :param centroids: 存储聚类中心的数组
+    :param alone_point: 存储孤立点的数据的数组
+    :param _map: 每一个聚类中心 映射 对应小于lambda的数据对象
+    :return: centroids :聚类中心, alone_point:数据孤立点, _map:剩余数据, , cf_surplus:大于epusilong的数据对象，即剩余数据对象
+    """
     cf_surplus_data = np.array(ci_surplus)
     cf_n = shape(cf_surplus_data)[1]
     cf_avg = np.average(cf_surplus_data, axis=0)
     cf_list = create_array(cf_n)
     cf_list = step1(cf_n, cf_list, cf_surplus_data, cf_avg)
     cf_value, cf_surplus, cf_lambda_obj = get_cluster(cf_list, cf_surplus_data, cf_avg)
-    # if array_is_equalse(cf_value, cf_lambda_obj) and not all_is_null(cf_value, cf_lambda_obj):
-    #     alone_point.append(cf_value)
-    #     return step4_to_step6(cf_surplus, centroids, alone_point, _map)
 
-    #
-    #
-    if not all_is_null(cf_value, cf_lambda_obj):
+    if not all_is_null(cf_value, cf_lambda_obj) and not array_is_equalse(cf_value, cf_lambda_obj):
         """
         cf_value, cf_lambda_obj 都不是空数组
-        
         """
         _map[one_dimensional_array_to_str(cf_value)] = make_array(cf_lambda_obj)
         centroids.append(cf_value)

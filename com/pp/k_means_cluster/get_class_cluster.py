@@ -62,4 +62,8 @@ class get_class_cluster:
     alone_point = list()
     # _centroids:聚类中心, _alone:数据孤立点, _cf_surplus:剩余数据, , _cf_surplus:大于epusilong的数据对象，即剩余数据对象
     _centroids, _alone, _map_data, _cf_surplus = step4_to_step6(ci_surplus, centroids, alone_point, _map)
+    #
+
+
+    print("++++++++++++++++++++++++++++")
 
