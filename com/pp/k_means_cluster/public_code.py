@@ -77,7 +77,8 @@ def step2(c_list, data_list, avg):
             lambda_data_object_list.append(vas)
         else:
             surplus.append(vas)
-    if len(lambda_data_object_list) == 1:
+
+    if len(lambda_data_object_list) == 1 or not any(lambda_data_object_list):
         return lambda_data_object_list, surplus, lambda_data_object_list
     """步骤3："""
     # 计算lambda数据对象中的平均值
@@ -189,6 +190,12 @@ def step1(n, c1_list, data, all_data_avg):
 
 
 def array_is_equalse(new_c_value, lamb_data):
+    """
+    两个数组完全一样，并且不为空
+    :param new_c_value:
+    :param lamb_data:
+    :return:
+    """
     return len(new_c_value) == len(lamb_data) and (
             distEclud(np.array(new_c_value), np.array(lamb_data)) == 0.0) \
            and not all_is_null(new_c_value, lamb_data)
@@ -208,17 +215,22 @@ def all_is_null(new_c_value, lamb_data):
 
 
 def get_cluster(c1_list, data, all_data_avg):
+    """
+    遍历寻找聚类中心
+    :param c1_list:
+    :param data:
+    :param all_data_avg:
+    :return:
+    """
     new_c_value, surplus, lamb_data = step2(c1_list, data, all_data_avg)
 
     """
-     all_is_null(new_c_value, lamb_data)当没有一个数据 小于lambda的数据对象的时候
-     array_is_equalse(new_c_value, lamb_data) 小于lambda的数据对象只有一个的时候
+     all_is_null 当没有一个数据 小于lambda的数据对象的时候
+     array_is_equalse  小于lambda的数据对象只有一个的时候
     """
-    # if all_is_null(new_c_value, lamb_data):
-    #     return
     if array_is_equalse(new_c_value, lamb_data) or all_is_null(new_c_value, lamb_data):
         return new_c_value, surplus, lamb_data
-    # 如果 返回的 new_c_value，lamb_data 为[]  如何处理？？？？？？？？？？
+    # 如果 返回的 new_c_value，lamb_data 完全一样，则他们是聚类中心
     if (c1_list == new_c_value).all():
         cc_value = new_c_value
         print("获取到聚类中心：", cc_value)
